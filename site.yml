@@ -1,6 +1,5 @@
 ---
-  - hosts: prometheus
+  - hosts: hosts
     roles:
       - role: osm_prometheus_exporter
     become: true
-    
