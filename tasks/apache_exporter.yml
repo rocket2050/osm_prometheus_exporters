@@ -1,0 +1,61 @@
+---
+
+- name: Add apache user
+  user:
+   name: apache_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/Lusitaniae/apache_exporter/releases/download/v0.5.0/apache_exporter-0.5.0.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/apache_exporter-0.5.0.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/apache_exporter-0.5.0.linux-amd64/apache_exporter /usr/local/bin
+  remote_src: yes
+
+- name: Changing ownership of apache_exporter
+  file:
+   path: /usr/local/bin/apache_exporter
+   owner: apache_exporter
+   group: apache_exporter
+   mode: 755
+
+- name: Running Apache exporter
+  file:
+   path: /etc/systemd/system/apache-exporter.service
+   state: touch
+   mode: 0755
+
+- name: copying files
+  template:
+   src: apache-exporter
+   dest: /etc/systemd/system/apache-exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    name: apache-exporter
+    daemon_reload: yes
+
+- name: enable service apache-exporter and ensure it is not masked
+  systemd:
+    name: apache-exporter
+    enabled: yes
+    masked: no
+
+- name: Start apache-exporter service
+  service:
+    name: apache-exporter
+    state: started

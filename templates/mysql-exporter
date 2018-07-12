@@ -1,0 +1,15 @@
+[Unit]
+Description=MySQL Exporter
+Wants=network.target
+After=network.target
+
+[Service]
+User=mysql_exporter
+Group=mysql_exporter
+Type=simple
+ExecStart=/usr/local/bin/mysqld_exporter
+Restart=always
+Environment=DATA_SOURCE_NAME='root:12345@(port:3306)/'
+
+[Install]
+WantedBy=multi-user.target

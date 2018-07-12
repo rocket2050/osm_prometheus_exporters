@@ -1,0 +1,62 @@
+---
+
+- name: Add the user nginx-vts-exporter
+  user:
+   name: nginx-vts-exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/hnlq715/nginx-vts-exporter/releases/download/v0.10.3/nginx-vts-exporter-0.10.3.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+  register: tar_file
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/nginx-vts-exporter-0.10.3.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/nginx-vts-exporter-0.10.3.linux-amd64/nginx-vts-exporter /usr/local/bin
+  remote_src: yes
+
+- name: Chnaging ownership of nginx-vts-exporter
+  file:
+   path: /usr/local/bin/nginx-vts-exporter
+   owner: nginx-vts-exporter
+   group: nginx-vts-exporter
+   mode: 755
+
+- name: Running nginx exporter
+  file:
+   path: /etc/systemd/system/nginx-vts-exporter.service
+   state: touch
+   mode: 0755
+
+- name: copying files
+  template:
+   src: nginx-vts-exporter
+   dest: /etc/systemd/system/nginx-vts-exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    name: nginx-vts-exporter
+    daemon_reload: yes
+
+- name: enable service node-exporter and ensure it is not masked
+  systemd:
+    name: nginx-vts-exporter
+    enabled: yes
+    masked: no
+
+- name: Start nginx-vts-exporter service
+  service:
+    name: nginx-vts-exporter
+    state: started

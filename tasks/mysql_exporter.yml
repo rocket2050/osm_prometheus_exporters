@@ -1,0 +1,61 @@
+---
+
+- name: Add the user mysql_exporter
+  user:
+   name: mysql_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/prometheus/mysqld_exporter/releases/download/v0.11.0/mysqld_exporter-0.11.0.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/mysqld_exporter-0.11.0.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/mysqld_exporter-0.11.0.linux-amd64/mysqld_exporter /usr/local/bin
+  remote_src: yes
+
+- name: Chnaging ownership of MongoDB_exporter
+  file:
+   path: /usr/local/bin/mysqld_exporter
+   owner: mysql_exporter
+   group: mysql_exporter
+   mode: 755
+
+- name: Running MySQL exporter
+  file:
+   path: /etc/systemd/system/mysql-exporter.service
+   state: touch
+   mode: 0755
+
+- name: copying files
+  template:
+   src: mysql-exporter
+   dest: /etc/systemd/system/mysql-exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    name: mysql-exporter
+    daemon_reload: yes
+
+- name: enable service mysql-exporter and ensure it is not masked
+  systemd:
+    name: mysql-exporter
+    enabled: yes
+    masked: no
+
+- name: Start mysql-exporter service
+  service:
+    name: mysql-exporter
+    state: started

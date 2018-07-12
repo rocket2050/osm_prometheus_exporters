@@ -1,0 +1,15 @@
+---
+  - include: node_exporter.yml
+    when:  exporter_name == 'node_exporter'
+
+  - include: mysql_exporter.yml
+    when:  exporter_name == 'mysql_exporter'
+
+  - include: apache_exporter.yml
+    when:  exporter_name == 'apache_exporter'
+
+  - include: mongodb_exporter.yml
+    when:  exporter_name == 'mongodb_exporter'
+
+  - include: nginx_exporter.yml
+    when:  exporter_name == 'nginx_exporter'

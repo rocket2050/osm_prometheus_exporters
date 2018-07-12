@@ -1,0 +1,10 @@
+[Unit]
+Description=MongoDB Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=MongoDB_exporter
+Group=MongoDB_exporter
+Type=simple
+ExecStart=/usr/local/bin/mongodb_exporter-linux-amd64

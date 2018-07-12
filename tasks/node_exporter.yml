@@ -1,0 +1,62 @@
+---
+
+- name: Add the user node_exporter
+  user:
+   name: node_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/prometheus/node_exporter/releases/download/v0.15.1/node_exporter-0.15.1.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+  register: tar_file
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/node_exporter-0.15.1.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/node_exporter-0.15.1.linux-amd64/node_exporter /usr/local/bin
+  remote_src: yes
+
+- name: Changing ownership of node_exporter
+  file:
+   path: /usr/local/bin/node_exporter
+   owner: node_exporter
+   group: node_exporter
+   mode: 755
+
+- name: Running node-exporter
+  file:
+   path: /etc/systemd/system/node_exporter.service
+   state: touch
+   mode: 0755
+
+- name: copying files
+  template:
+   src: node_exporter
+   dest: /etc/systemd/system/node_exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    name: node_exporter
+    daemon_reload: yes
+
+- name: enable service node-exporter and ensure it is not masked
+  systemd:
+    name: node_exporter
+    enabled: yes
+    masked: no
+
+- name: Start node_exporter service
+  service:
+    name: node_exporter
+    state: started

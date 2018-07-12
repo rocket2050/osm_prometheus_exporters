@@ -1,0 +1,53 @@
+---
+
+- name: Add the user MongoDB_exporter
+  user:
+   name: MongoDB_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/dcu/mongodb_exporter/releases/download/v1.0.0/mongodb_exporter-linux-amd64"
+   dest: /opt
+   mode: 755
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/mongodb_exporter-linux-amd64 /usr/local/bin
+  remote_src: yes
+
+- name: Chnaging ownership of MongoDB_exporter
+  file:
+   path: /usr/local/bin/mongodb_exporter-linux-amd64
+   owner: MongoDB_exporter
+   group: MongoDB_exporter
+   mode: 755
+
+- name: Running MongoDB_exporter
+  file:
+   path: /etc/systemd/system/mongodb-exporter.service
+   state: touch
+   mode: 0755
+
+- name: copying files
+  template:
+   src: mongodb-exporter
+   dest: /etc/systemd/system/mongodb-exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    name: mongodb-exporter
+    daemon_reload: yes
+
+- name: enable service mongodb-exporter and ensure it is not masked
+  systemd:
+    name: mongodb-exporter
+    enabled: yes
+    masked: no
+
+- name: Start mongodb-exporter service
+  service:
+    name: mongodb-exporter
+    state: started

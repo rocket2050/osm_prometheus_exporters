@@ -1,0 +1,13 @@
+[Unit]
+Description=Nginx Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=nginx-vts-exporter
+Group=nginx-vts-exporter
+Type=simple
+ExecStart=/usr/local/bin/nginx-vts-exporter
+
+[Install]
+WantedBy=multi-user.target
