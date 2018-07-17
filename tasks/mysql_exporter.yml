@@ -35,7 +35,7 @@
   lineinfile:
     path: /root/.bashrc
     insertafter: "EOF"
-    line: "export DATA_SOURCE_NAME='root:{{ db_admin }}@unix(/var/run/mysqld/mysqld.sock)/'"
+    line: "export DATA_SOURCE_NAME='root:{{ db_root_password }}@unix(/var/run/mysqld/mysqld.sock)/'"
   tags:
     - env
 
