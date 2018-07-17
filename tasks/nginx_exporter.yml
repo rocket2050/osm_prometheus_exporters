@@ -2,35 +2,35 @@
 
 - name: Add the user nginx-vts-exporter
   user:
-   name: nginx-vts-exporter
+   name: prometheus-nginxlog-exporter
    shell: /bin/bash
 
 - name: Download URL
   become: true
   get_url:
-   url: "https://github.com/hnlq715/nginx-vts-exporter/releases/download/v0.10.3/nginx-vts-exporter-0.10.3.linux-amd64.tar.gz"
+   url: "https://github.com/martin-helmich/prometheus-nginxlog-exporter/releases/download/v1.2.0/prometheus-nginxlog-exporter"
    dest: /opt
    mode: 755
   register: tar_file
 
-- name: UnTar a file
-  become: true
-  unarchive:
-   src: /opt/nginx-vts-exporter-0.10.3.linux-amd64.tar.gz
-   dest: /opt
-   remote_src: yes
-  tags: untar_file
+# - name: UnTar a file
+#   become: true
+#   unarchive:
+#    src: /opt/nginx-vts-exporter-0.10.3.linux-amd64.tar.gz
+#    dest: /opt
+#    remote_src: yes
+#   tags: untar_file
 
 - name: Copy binary files to /usr/local/bin
   become: true
-  command: cp -r /opt/nginx-vts-exporter-0.10.3.linux-amd64/nginx-vts-exporter /usr/local/bin
+  command: cp -r /opt/prometheus-nginxlog-exporter /usr/local/bin
   remote_src: yes
 
 - name: Chnaging ownership of nginx-vts-exporter
   file:
-   path: /usr/local/bin/nginx-vts-exporter
-   owner: nginx-vts-exporter
-   group: nginx-vts-exporter
+   path: /usr/local/bin/prometheus-nginxlog-exporter
+   owner: prometheus-nginxlog-exporter
+   group: prometheus-nginxlog-exporter
    mode: 755
 
 - name: Running nginx exporter
@@ -49,6 +49,13 @@
   systemd:
     name: nginx-vts-exporter
     daemon_reload: yes
+
+- name: Add configuration file for Nginx Exporter
+  template:
+    src: prometheus-nginxlog-exporter.hcl
+    dest: /etc/prometheus-nginxlog-exporter.hcl
+    owner: prometheus-nginxlog-exporter
+    group: prometheus-nginxlog-exporter
 
 - name: enable service node-exporter and ensure it is not masked
   systemd:
