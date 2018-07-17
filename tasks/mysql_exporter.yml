@@ -1,5 +1,4 @@
 ---
-
 - name: Add the user mysql_exporter
   user:
    name: mysql_exporter
@@ -32,17 +31,25 @@
    group: mysql_exporter
    mode: 755
 
-- name: Running MySQL exporter
-  file:
-   path: /etc/systemd/system/mysql-exporter.service
-   state: touch
-   mode: 0755
+- name: Set ENV Path
+  lineinfile:
+    path: /root/.bashrc
+    insertafter: "EOF"
+    line: "export DATA_SOURCE_NAME='root:{{ db_admin }}@unix(/var/run/mysqld/mysqld.sock)/'"
+  tags:
+    - env
 
-- name: copying files
+- name: Executing Script
+  shell: source /root/.bashrc
+  args:
+    executable: /bin/bash
+  tags:
+    - env
+
+- name: Make Service of MySQL Exporter
   template:
-   src: mysql-exporter
-   dest: /etc/systemd/system/mysql-exporter.service
-   mode: 0755
+    src: mysql-exporter
+    dest: /etc/systemd/system/mysql-exporter.service
 
 - name: Configuring service
   systemd:
@@ -58,4 +65,4 @@
 - name: Start mysql-exporter service
   service:
     name: mysql-exporter
-    state: started
+    state: restarted
