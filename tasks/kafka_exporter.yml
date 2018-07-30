@@ -1,0 +1,46 @@
+---
+- name: Add the user kafka_exporter
+  user:
+   name: kafka_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/danielqsj/kafka_exporter/releases/download/v1.2.0/kafka_exporter-1.2.0.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/kafka_exporter-1.2.0.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/kafka_exporter-1.2.0.linux-amd64/kafka_exporter /usr/local/bin/
+  remote_src: yes
+
+- name: copying files
+  template:
+   src: kafka_exporter
+   dest: /etc/systemd/system/kafka_exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    daemon_reload: yes
+
+- name: enable service kafka_exporter and ensure it is not masked
+  systemd:
+    name: kafka_exporter
+    enabled: yes
+    masked: no
+
+- name: Start kafka_exporter service
+  service:
+    name: kafka_exporter
+    state: started

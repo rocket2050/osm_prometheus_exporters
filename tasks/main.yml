@@ -16,3 +16,6 @@
 
   - include: elasticsearch_exporter.yml
     when: exporter_name == 'elasticsearch_exporter'
+
+  - include: kafka_exporter.yml
+    when: exporter_name == 'kafka_exporter'
