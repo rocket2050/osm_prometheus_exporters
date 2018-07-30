@@ -13,3 +13,6 @@
 
   - include: nginx_exporter.yml
     when:  exporter_name == 'nginx'
+
+  - include: elasticsearch_exporter.yml
+    when: exporter_name == 'elasticsearch_exporter'

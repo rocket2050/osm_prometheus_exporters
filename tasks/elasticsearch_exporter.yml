@@ -1,0 +1,47 @@
+---
+
+- name: Add the user elasticsearch_exporter
+  user:
+   name: elasticsearch_exporter
+   shell: /bin/bash
+
+- name: Download URL
+  become: true
+  get_url:
+   url: "https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v1.0.2/elasticsearch_exporter-1.0.2.linux-amd64.tar.gz"
+   dest: /opt
+   mode: 755
+
+- name: UnTar a file
+  become: true
+  unarchive:
+   src: /opt/elasticsearch_exporter-1.0.2.linux-amd64.tar.gz
+   dest: /opt
+   remote_src: yes
+  tags: untar_file
+
+- name: Copy binary files to /usr/local/bin
+  become: true
+  command: cp -r /opt/elasticsearch_exporter-1.0.2.linux-amd64/elasticsearch_exporter /usr/local/bin
+  remote_src: yes
+
+- name: copying files
+  template:
+   src: elasticsearch_exporter
+   dest: /etc/systemd/system/elasticsearch_exporter.service
+   mode: 0755
+
+- name: Configuring service
+  systemd:
+    daemon_reload: yes
+
+- name: enable service elasticsearch_exporter and ensure it is not masked
+  systemd:
+    name: elasticsearch_exporter
+    enabled: yes
+    masked: no
+
+- name: Start elasticsearch_exporter service
+  service:
+    name: elasticsearch_exporter
+    state: started

@@ -1,0 +1,14 @@
+[Unit]
+Description=Elasticsearch Exporter
+Wants=network.target
+After=network.target
+
+[Service]
+User=elasticsearch_exporter
+Group=elasticsearch_exporter
+Type=simple
+ExecStart=/usr/local/bin/elasticsearch_exporter -es.uri=http://localhost:9200
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

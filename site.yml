@@ -1,5 +1,6 @@
 ---
   - hosts: hosts
+    user: root
     roles:
-      - role: osm_prometheus_exporter
+      - osm_prometheus_exporters
     become: true
